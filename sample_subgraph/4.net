@@ -1,0 +1,31 @@
+5
+3
+1 false 2 false 3 false 
+3 false 4 false 5 true 
+0 false 5 true 6 true 
+false
+
+3
+0 false 1 false 2 false 
+3 true 4 false 5 true 
+0 false 4 true 6 false 
+false
+
+3
+0 false 1 false 2 false 
+0 false 4 true 5 true 
+0 false 3 true 6 false 
+false
+
+3
+0 false 1 false 2 false 
+3 false 4 true 5 true 
+0 false 3 true 6 false 
+false
+
+3
+1 false 3 true 4 false 
+2 true 4 true 5 true 
+0 false 3 true 6 false 
+false
+
