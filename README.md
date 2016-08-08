@@ -2,6 +2,8 @@ Exact Synthesis
 ====
 Package for generating minimum-size 4-input majority-inverter graphs (MIGs)
 
+For the implementation details, please refer to [Optimizing Majority-Inverter Graphs With Functional Hashing](http://msoeken.github.io/papers/2016_date_3.pdf)
+
 Installation
 ====
 
