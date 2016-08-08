@@ -153,12 +153,13 @@ class Node {
 };
 
 int main(int argv, char** argc) {
-    
     unsigned SUBGRAPH_BOUND = 5;
     for (int c = 0; c < NPN; ++c) {
-        cout << c << endl;
         unsigned uTruth = ClassToTruth[c];
         unsigned nNode = ClassToNodeNum[c];
+        cout << "Generating subgraphs for class " << c << ",";
+        cout << " truth = ";  printf("0x%04X,", uTruth);
+        cout << " min k = " << nNode << endl;
         if (nNode == 0) continue;
 
         vector<Node> nodes;

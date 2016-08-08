@@ -1,4 +1,4 @@
-exact:
-	g++ exact_synthesis.cpp -o exact -lz3 -O3
+main:
+	g++ exact_synthesis.cpp -o gen_subgraphs -lz3 -O3
 clean:
-	rm -f exact
+	rm -f gen_subgraphs
