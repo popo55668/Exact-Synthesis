@@ -153,7 +153,7 @@ class Node {
 };
 
 int main(int argv, char** argc) {
-    unsigned SUBGRAPH_BOUND = 5;
+    unsigned SUBGRAPH_BOUND = 10;
     for (int c = 0; c < NPN; ++c) {
         unsigned uTruth = ClassToTruth[c];
         unsigned nNode = ClassToNodeNum[c];
