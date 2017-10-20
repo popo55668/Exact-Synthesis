@@ -9,9 +9,6 @@
 #include <fstream>
 #include "z3++.h"
 
-using namespace z3;
-using namespace std;
-
 const unsigned VarToClassNum[] = { 0, 2, 4, 14, 222, 616126 };
 const unsigned ClassToNodeNum[] = 
 {
@@ -59,7 +56,7 @@ const unsigned ClassToTruth[] =
 const int VAR = 4;
 const int FUNC = 1 << VAR;
 const int NPN = VarToClassNum[VAR];
-context ctx;
+z3::context ctx;
 
 class Node {
     public:
@@ -71,47 +68,47 @@ class Node {
         void initVars() 
         {
             for (int i = 0; i < FUNC; ++i) {
-                stringstream name;  name << "b_" << id << "_" << i;
+                std::stringstream name;  name << "b_" << id << "_" << i;
                 b.push_back(ctx.bool_const(name.str().c_str()));
             }
             for (int i = 0; i < FUNC; ++i) {
-                stringstream name;  name << "a1_" << id << "_" << i;
+                std::stringstream name;  name << "a1_" << id << "_" << i;
                 a1.push_back(ctx.bool_const(name.str().c_str()));
             }
             for (int i = 0; i < FUNC; ++i) {
-                stringstream name;  name << "a2_" << id << "_" << i;
+                std::stringstream name;  name << "a2_" << id << "_" << i;
                 a2.push_back(ctx.bool_const(name.str().c_str()));
             }
             for (int i = 0; i < FUNC; ++i) {
-                stringstream name;  name << "a3_" << id << "_" << i;
+                std::stringstream name;  name << "a3_" << id << "_" << i;
                 a3.push_back(ctx.bool_const(name.str().c_str()));
             }
             for (int i = 0; i < 3; ++i) {
-                stringstream name;  name << "s_" << i << "_" << id;
+                std::stringstream name;  name << "s_" << i << "_" << id;
                 ss.push_back(ctx.int_const(name.str().c_str()));
             }
             for (int i = 0; i < 3; ++i) {
-                stringstream name;  name << "p_" << i << "_" << id;
+                std::stringstream name;  name << "p_" << i << "_" << id;
                 ps.push_back(ctx.bool_const(name.str().c_str()));
             }
         }
 
         // Majority functionality
-        void addMajorityFormula(solver& svr)
+        void addMajorityFormula(z3::solver& svr)
         {
             for (int i = 0; i < FUNC; ++i) {
-                expr bb = b[i], aa1 = a1[i], aa2 = a2[i], aa3 = a3[i];
-                expr f = ( bb == ((aa1&&aa2)||(aa2&&aa3)||(aa1&&aa3)) );
+                z3::expr bb = b[i], aa1 = a1[i], aa2 = a2[i], aa3 = a3[i];
+                z3::expr f = ( bb == ((aa1&&aa2)||(aa2&&aa3)||(aa1&&aa3)) );
                 svr.add(f);
             }
         }
 
         // Input connection: 1.constant  2.variables
-        void addConnectionFormula(solver& svr)
+        void addConnectionFormula(z3::solver& svr)
         {
-            expr_vector* aa;
+            z3::expr_vector* aa;
             for (int i = 0; i < 3; ++i) {
-                expr ssi = ss[i];
+                z3::expr ssi = ss[i];
                 svr.add( (ssi < VAR + id) );  
                 svr.add( (ssi >= 0) );
 
@@ -121,15 +118,15 @@ class Node {
                 
                 // constant
                 for (int j = 0; j < FUNC; ++j) {
-                    expr impl = implies( (ssi == 0), ((*aa)[j] == ps[i]) );
+                    z3::expr impl = implies( (ssi == 0), ((*aa)[j] == ps[i]) );
                     svr.add(impl);
                 }
                 // variables
                 for (int j = 1; j <= VAR; ++j) {
                     for (int k = 0; k < FUNC; ++k) {
                         bool value = (k >> (j-1)) & 01;
-                        expr psi = ps[i];
-                        expr impl = implies( (ssi == j), ((*aa)[k] == ((value&&!psi)||(!value&&psi))) );
+                        z3::expr psi = ps[i];
+                        z3::expr impl = implies( (ssi == j), ((*aa)[k] == ((value&&!psi)||(!value&&psi))) );
                         svr.add(impl);
                     }
                 }
@@ -137,19 +134,19 @@ class Node {
         }
 
         // Symmetry breaking
-        void addSymmetryFormula(solver& svr)
+        void addSymmetryFormula(z3::solver& svr)
         {
             svr.add( (ss[0] < ss[1]) );
             svr.add( (ss[1] < ss[2]) );
         }
 
         int             id;
-        expr_vector      b;
-        expr_vector     a1;
-        expr_vector     a2;
-        expr_vector     a3;
-        expr_vector     ss;
-        expr_vector     ps;
+        z3::expr_vector      b;
+        z3::expr_vector     a1;
+        z3::expr_vector     a2;
+        z3::expr_vector     a3;
+        z3::expr_vector     ss;
+        z3::expr_vector     ps;
 };
 
 int main(int argv, char** argc) {
@@ -157,15 +154,15 @@ int main(int argv, char** argc) {
     for (int c = 0; c < NPN; ++c) {
         unsigned uTruth = ClassToTruth[c];
         unsigned nNode = ClassToNodeNum[c];
-        cout << "Generating subgraphs for class " << c << ",";
-        cout << " truth = ";  printf("0x%04X,", uTruth);
-        cout << " min k = " << nNode << endl;
+        std::cout << "Generating subgraphs for class " << c << ",";
+        std::cout << " truth = ";  printf("0x%04X,", uTruth);
+        std::cout << " min k = " << nNode << std::endl;
         if (nNode == 0) continue;
 
-        vector<Node> nodes;
+        std::vector<Node> nodes;
         for (int i = 1; i <= nNode; ++i) nodes.push_back(Node(i)); 
 
-        solver svr(ctx);
+        z3::solver svr(ctx);
         for (int i = 0; i < nNode; ++i) {
             nodes[i].addMajorityFormula(svr);
             nodes[i].addConnectionFormula(svr);
@@ -177,17 +174,17 @@ int main(int argv, char** argc) {
             Node* maj = &nodes[i];
             for (int j = 1; j < maj->id; ++j) {
                 Node* in = &nodes[j-1]; // topologically lower nodes
-                expr_vector* aa;
+                z3::expr_vector* aa;
                 for (int k = 0; k < 3; ++k) {
                     if (k == 0) aa = &maj->a1;
                     else if (k == 1) aa = &maj->a2;
                     else aa = &maj->a3;
 
-                    expr ssk = maj->ss[k];
-                    expr psk = maj->ps[k];
+                    z3::expr ssk = maj->ss[k];
+                    z3::expr psk = maj->ps[k];
                     for (int l = 0; l < FUNC; ++l) {
-                        expr bl = in->b[l];
-                        expr impl = implies( (ssk == VAR + j), ((*aa)[l] == ((bl&&!psk)||(!bl&&psk))) );
+                        z3::expr bl = in->b[l];
+                        z3::expr impl = implies( (ssk == VAR + j), ((*aa)[l] == ((bl&&!psk)||(!bl&&psk))) );
                         svr.add(impl);
                     }
                 }
@@ -195,12 +192,12 @@ int main(int argv, char** argc) {
         }
 
         // Function Semantics
-        expr root_p = ctx.bool_const("root_p");
+        z3::expr root_p = ctx.bool_const("root_p");
         Node* root_node = &nodes.back();
         for (int i = 0; i < FUNC; ++i) {
             bool value = (uTruth >> i) & 01;
-            expr bi = root_node->b[i];
-            expr f = (bi == ((root_p && !value) || (!root_p && value)));
+            z3::expr bi = root_node->b[i];
+            z3::expr f = (bi == ((root_p && !value) || (!root_p && value)));
             svr.add(f);
         }
 
@@ -208,13 +205,13 @@ int main(int argv, char** argc) {
         svr.add(!root_p);
 
         // Subgraphs generation
-        ofstream out("temp.txt", ios::out);
+        std::ofstream out("temp.txt", std::ios::out);
         unsigned nGraph = 0;
         while (svr.check() && nGraph < SUBGRAPH_BOUND) {
             nGraph++;
-            model mod = svr.get_model();
-            expr block = (root_p == mod.eval(root_p));
-            out << nodes.size() << endl;
+            z3::model mod = svr.get_model();
+            z3::expr block = (root_p == mod.eval(root_p));
+            out << nodes.size() << std::endl;
             for (int i = 0; i < nodes.size(); ++i) {
                 for (int j = 0; j < 3; ++j) {
                     out << mod.eval(nodes[i].ss[j]) << " " << mod.eval(nodes[i].ps[j]) << " ";
@@ -223,16 +220,18 @@ int main(int argv, char** argc) {
                 }
                 out << "\n";
             }
-            out << mod.eval(root_p) << endl << endl;
+            out << mod.eval(root_p) << std::endl << std::endl;
             svr.add(!block);
         }
         out.close();
-        ifstream ifile("temp.txt", ios::in);
-        stringstream str;  str << c << ".net";
-        ofstream ofile(str.str().c_str(), ios::out | ios::app );
-        ofile << nGraph << endl;
+        std::ifstream ifile("temp.txt", std::ios::in);
+        std::stringstream str;
+        str << c << ".net";
+        std::ofstream ofile(str.str().c_str(), std::ios::out | std::ios::app );
+        ofile << nGraph << std::endl;
         ofile << ifile.rdbuf();
-        ofile.close();  ifile.close();
+        ofile.close();
+        ifile.close();
     }
     return 0;
 }
